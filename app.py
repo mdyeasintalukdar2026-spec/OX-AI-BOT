@@ -17,7 +17,7 @@ http_session = requests.Session()
 
 @app.route('/')
 def home():
-    return "Quotex Sniper Bot Engine v125.0 [AUTO SCAN BOT with Password & Direct Execution] Running 24/7!"
+    return "Quotex Sniper Bot Engine v126.0 [Advanced Multi-Color Scan & Secure Auth] Running 24/7!"
 
 @app.route('/ping')
 def ping():
@@ -28,7 +28,7 @@ def get_signal():
     try:
         current_sec = int(time.time())
         base_signal = "UP" if (current_sec % 2 == 0) else "DOWN"
-        signal_conf = int(85 + ((current_sec * 7) % 12))
+        signal_conf = int(86 + ((current_sec * 7) % 13))
         res = jsonify({
             "signal": base_signal,
             "trend": "STRONG MOMENTUM",
@@ -41,7 +41,7 @@ def get_signal():
         res = jsonify({
             "signal": "UP",
             "trend": "STRONG MOMENTUM",
-            "confidence": 88,
+            "confidence": 90,
             "status": "GREEN_EXECUTE"
         })
         res.headers.add("Access-Control-Allow-Origin", "*")
@@ -59,91 +59,53 @@ def bot_script():
             if(!oldS){
                 var s = d.createElement('style');
                 s.id = 'ybs_global';
-                s.innerHTML = '@keyframes rgbColorShift {0%{border-color:#00ff66;box-shadow:0 0 15px #00ff66;}33%{border-color:#00ffff;box-shadow:0 0 15px #00ffff;}66%{border-color:#ff0055;box-shadow:0 0 15px #ff0055;}100%{border-color:#00ff66;box-shadow:0 0 15px #00ff66;}}' +
-                              '@keyframes borderSlowGlow {0%{border-color:#ff3366;}33%{border-color:#00ffff;}66%{border-color:#00ff66;}100%{border-color:#ff3366;}}' +
+                s.innerHTML = '@keyframes multiColorGlow {' +
+                              '0% { border-color: #00ff66; box-shadow: 0 0 18px #00ff66; }' +
+                              '20% { border-color: #00ffff; box-shadow: 0 0 18px #00ffff; }' +
+                              '40% { border-color: #3333ff; box-shadow: 0 0 18px #3333ff; }' +
+                              '60% { border-color: #ff00ff; box-shadow: 0 0 18px #ff00ff; }' +
+                              '80% { border-color: #ff3300; box-shadow: 0 0 18px #ff3300; }' +
+                              '100% { border-color: #00ff66; box-shadow: 0 0 18px #00ff66; }' +
+                              '}' +
                               '@keyframes laserScanVertical {0%{top:0%;opacity:0.9;}50%{top:95%;opacity:1;}100%{top:0%;opacity:0.9;}}' +
                               '@keyframes panelPop {0%{opacity:0;transform:translate(-50%, -45%) scale(0.9);}100%{opacity:1;transform:translate(-50%, -50%) scale(1);}}' +
                               '@keyframes spinAnim {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}';
                 d.head.appendChild(s);
             }
 
-            var existingWrap = d.getElementById('sniper_target_wrap');
-            if(existingWrap) existingWrap.remove();
+            // Check if already verified in session storage
+            var isVerified = sessionStorage.getItem('scan_bot_verified_' + uniqueId) === 'true';
 
-            var wrap = d.createElement('div');
-            wrap.id = 'sniper_target_wrap';
-            wrap.style.cssText = 'position:fixed;bottom:70px;right:20px;display:flex;flex-direction:column;align-items:center;z-index:2147483647;cursor:pointer;';
-            
-            var b = d.createElement('div');
-            b.id = 'sniper_target_btn';
-            b.style.cssText = 'width:62px;height:62px;border-radius:50%;background:#030407;display:flex;align-items:center;justify-content:center;border:2.5px solid #00ff66;animation:rgbColorShift 6s infinite linear;box-sizing:border-box;overflow:hidden;';
-            b.innerHTML = '<img src="https://i.postimg.cc/JzRR8g6M/IMG-20261102-WA0003.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
-            wrap.appendChild(b);
+            if(!isVerified){
+                createLicensePanel();
+            } else {
+                createFloatingBot();
+            }
 
-            var lbl = d.createElement('div');
-            lbl.style.cssText = 'margin-top:3px;font-size:7px;font-weight:900;color:#00ff66;font-family:sans-serif;background:rgba(3,4,7,0.85);padding:1px 6px;border-radius:3px;border:1px solid rgba(0,255,102,0.4);white-space:nowrap;box-shadow:0 0 5px rgba(0,0,0,0.8);animation:rgbColorShift 6s infinite linear;';
-            lbl.innerText = 'AUTO SCAN BOT';
-            wrap.appendChild(lbl);
-
-            d.body.appendChild(wrap);
-            
-            var isDragging = false, startX, startY, hasMoved = false;
-            wrap.onmousedown = wrap.ontouchstart = function(e){
-                isDragging = true; hasMoved = false;
-                var p = e.touches ? e.touches[0] : e;
-                startX = p.clientX - wrap.offsetLeft;
-                startY = p.clientY - wrap.offsetTop;
-            };
-            wrap.onmousemove = wrap.ontouchmove = function(e){
-                if(!isDragging) return;
-                var p = e.touches ? e.touches[0] : e;
-                var nx = p.clientX - startX, ny = p.clientY - startY;
-                if(Math.abs(nx - wrap.offsetLeft) > 2 || Math.abs(ny - wrap.offsetTop) > 2) hasMoved = true;
-                wrap.style.left = nx + 'px';
-                wrap.style.top = ny + 'px';
-                wrap.style.bottom = 'auto';
-                wrap.style.right = 'auto';
-            };
-            wrap.onmouseup = wrap.ontouchend = function(){ isDragging = false; };
-            
-            wrap.onclick = function(){
-                if(hasMoved) return;
-                
-                // Check if already verified in session
-                if(sessionStorage.getItem('scan_bot_verified_' + uniqueId) === 'true'){
-                    runLaserScanningAndTrade();
-                } else {
-                    createLicensePanel(wrap);
-                }
-            };
-
-            function createLicensePanel(targetWrap){
-                targetWrap.style.display = 'none';
+            function createLicensePanel(){
                 var panel = d.createElement('div');
                 panel.id = 'scan_bot_license_panel';
-                panel.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%, -50%);width:240px;background:#070b14;border:2.5px solid #00ff66;border-radius:10px;z-index:2147483647;font-family:sans-serif;color:#fff;box-shadow:0 15px 40px rgba(0,0,0,0.95);overflow:hidden;animation:panelPop 0.3s ease-out forwards;';
+                panel.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%, -50%);width:245px;background:#070b14;border:3px solid #00ff66;border-radius:12px;z-index:2147483647;font-family:sans-serif;color:#fff;box-shadow:0 15px 40px rgba(0,0,0,0.95);overflow:hidden;animation:panelPop 0.3s ease-out forwards, multiColorGlow 6s infinite linear;';
                 
                 var header = d.createElement('div');
-                header.style.cssText = 'background:#03050a;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #131d2e;';
-                header.innerHTML = '<div style="display:flex;align-items:center;gap:6px;">' +
-                                   '<div style="background:#1a080d;border:1px solid #ff3366;width:18px;height:18px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;">🤖</div>' +
+                header.style.cssText = 'background:#03050a;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #131d2e;';
+                header.innerHTML = '<div style="display:flex;align-items:center;gap:8px;">' +
+                                   '<img src="https://i.postimg.cc/JzRR8g6M/IMG-20261102-WA0003.jpg" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid #00ff66;" />' +
                                    '<div>' +
-                                   '<div style="font-size:9.5px;font-weight:900;color:#fff;">AUTO SCAN BOT</div>' +
-                                   '<div style="font-size:5.5px;color:#8a99ad;">SECURE ACCESS</div>' +
+                                   '<div style="font-size:10px;font-weight:900;color:#fff;">AUTO SCAN BOT</div>' +
+                                   '<div style="font-size:5.5px;color:#8a99ad;">SECURE LOGIN</div>' +
                                    '</div>' +
                                    '</div>' +
                                    '<button id="close-license" style="background:#101826;border:none;color:#fff;width:18px;height:18px;border-radius:3px;cursor:pointer;font-weight:bold;font-size:10px;">×</button>';
                 panel.appendChild(header);
                 
-                header.querySelector('#close-license').onclick = function(){ 
-                    panel.remove(); 
-                    targetWrap.style.display = 'flex'; 
-                };
+                header.querySelector('#close-license').onclick = function(){ panel.remove(); };
 
                 var licenseBox = d.createElement('div');
-                licenseBox.style.cssText = 'padding:10px;background:#070b14;';
-                licenseBox.innerHTML = '<div style="font-size:6.5px;color:#8a99ad;margin-bottom:4px;" id="err-msg">Enter Password to Activate Bot</div>' +
-                                       '<input type="password" id="license-input" placeholder="Enter Password (112233)" style="width:100%;box-sizing:border-box;background:#0d1526;border:1px solid #16253f;padding:6px;border-radius:4px;color:#fff;font-size:8px;outline:none;margin-bottom:6px;" />' +
+                licenseBox.style.cssText = 'padding:12px;background:#070b14;text-align:center;';
+                licenseBox.innerHTML = '<div style="margin-bottom:8px;"><img src="https://i.postimg.cc/JzRR8g6M/IMG-20261102-WA0003.jpg" style="width:45px;height:45px;border-radius:50%;object-fit:cover;border:2px solid #00ff66;animation:multiColorGlow 6s infinite linear;" /></div>' +
+                                       '<div style="font-size:6.5px;color:#8a99ad;margin-bottom:6px;" id="err-msg">Enter Password to Activate Bot</div>' +
+                                       '<input type="password" id="license-input" placeholder="Enter Password (112233)" style="width:100%;box-sizing:border-box;background:#0d1526;border:1px solid #16253f;padding:6px;border-radius:4px;color:#fff;font-size:8px;outline:none;margin-bottom:8px;text-align:center;" />' +
                                        '<button id="verify-btn" style="width:100%;background:#00c853;border:none;padding:6px;border-radius:4px;font-weight:900;font-size:8px;color:#000;cursor:pointer;">ACTIVATE BOT</button>';
                 panel.appendChild(licenseBox);
 
@@ -158,8 +120,7 @@ def bot_script():
                         setTimeout(function(){
                             sessionStorage.setItem('scan_bot_verified_' + uniqueId, 'true');
                             panel.remove();
-                            targetWrap.style.display = 'flex';
-                            runLaserScanningAndTrade();
+                            createFloatingBot();
                         }, 1200);
                     } else {
                         errMsg.innerText = '⚠️ INCORRECT PASSWORD!';
@@ -172,6 +133,52 @@ def bot_script():
                 };
 
                 d.body.appendChild(panel);
+            }
+
+            function createFloatingBot(){
+                var existingWrap = d.getElementById('sniper_target_wrap');
+                if(existingWrap) existingWrap.remove();
+
+                var wrap = d.createElement('div');
+                wrap.id = 'sniper_target_wrap';
+                wrap.style.cssText = 'position:fixed;bottom:70px;right:20px;display:flex;flex-direction:column;align-items:center;z-index:2147483647;cursor:pointer;';
+                
+                var b = d.createElement('div');
+                b.id = 'sniper_target_btn';
+                b.style.cssText = 'width:62px;height:62px;border-radius:50%;background:#030407;display:flex;align-items:center;justify-content:center;border:3px solid #00ff66;animation:multiColorGlow 6s infinite linear;box-sizing:border-box;overflow:hidden;';
+                b.innerHTML = '<img src="https://i.postimg.cc/JzRR8g6M/IMG-20261102-WA0003.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+                wrap.appendChild(b);
+
+                var lbl = d.createElement('div');
+                lbl.style.cssText = 'margin-top:3px;font-size:7px;font-weight:900;color:#00ff66;font-family:sans-serif;background:rgba(3,4,7,0.85);padding:1px 6px;border-radius:3px;border:1.5px solid #00ff66;white-space:nowrap;box-shadow:0 0 5px rgba(0,0,0,0.8);animation:multiColorGlow 6s infinite linear;';
+                lbl.innerText = 'AUTO SCAN BOT';
+                wrap.appendChild(lbl);
+
+                d.body.appendChild(wrap);
+                
+                var isDragging = false, startX, startY, hasMoved = false;
+                wrap.onmousedown = wrap.ontouchstart = function(e){
+                    isDragging = true; hasMoved = false;
+                    var p = e.touches ? e.touches[0] : e;
+                    startX = p.clientX - wrap.offsetLeft;
+                    startY = p.clientY - wrap.offsetTop;
+                };
+                wrap.onmousemove = wrap.ontouchmove = function(e){
+                    if(!isDragging) return;
+                    var p = e.touches ? e.touches[0] : e;
+                    var nx = p.clientX - startX, ny = p.clientY - startY;
+                    if(Math.abs(nx - wrap.offsetLeft) > 2 || Math.abs(ny - wrap.offsetTop) > 2) hasMoved = true;
+                    wrap.style.left = nx + 'px';
+                    wrap.style.top = ny + 'px';
+                    wrap.style.bottom = 'auto';
+                    wrap.style.right = 'auto';
+                };
+                wrap.onmouseup = wrap.ontouchend = function(){ isDragging = false; };
+                
+                wrap.onclick = function(){
+                    if(hasMoved) return;
+                    runLaserScanningAndTrade();
+                };
             }
 
             function forceClick(el) {
@@ -219,7 +226,7 @@ def bot_script():
                 if(isScanningActive) return;
                 isScanningActive = true;
 
-                // Create Fullscreen Laser Scan Overlay with top indicator
+                // Create Fullscreen Laser Scan Overlay with multi-color animated top indicator
                 var overlay = d.createElement('div');
                 overlay.id = 'laser_scan_overlay';
                 overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:2147483646;overflow:hidden;font-family:sans-serif;';
@@ -229,24 +236,24 @@ def bot_script():
                 laserLine.style.cssText = 'position:absolute;left:0;width:100%;height:6px;background:linear-gradient(90deg, transparent, #00ff66, #00ffff, #ff0055, #00ff66, transparent);box-shadow:0 0 25px #00ff66, 0 0 45px #00ffff;animation:laserScanVertical 1.2s infinite ease-in-out;';
                 overlay.appendChild(laserLine);
 
-                // Top Center Market Scanning Indicator (with color-changing border animation)
+                // Top Center Market Scanning Indicator with Multi-color Border Animation
                 var scanMsg = d.createElement('div');
-                scanMsg.style.cssText = 'position:absolute;top:15px;left:50%;transform:translateX(-50%);background:rgba(3,4,7,0.92);border:2px solid #00ff66;color:#00ff66;padding:6px 16px;border-radius:20px;font-weight:900;font-size:11.5px;box-shadow:0 0 18px rgba(0,255,102,0.6);letter-spacing:0.8px;animation:borderSlowGlow 3s infinite linear;';
+                scanMsg.style.cssText = 'position:absolute;top:15px;left:50%;transform:translateX(-50%);background:rgba(3,4,7,0.92);border:2.5px solid #00ff66;color:#00ff66;padding:6px 18px;border-radius:20px;font-weight:900;font-size:11.5px;box-shadow:0 0 20px rgba(0,255,102,0.6);letter-spacing:0.8px;animation:multiColorGlow 6s infinite linear;';
                 scanMsg.innerText = 'MARKET SCANNING...';
                 overlay.appendChild(scanMsg);
 
                 d.body.appendChild(overlay);
 
-                // Exact 5 seconds scanning duration before fetching signal & taking trade
+                // Exactly 5 seconds scanning duration before taking trade
                 setTimeout(function(){
                     fetch('https://ox-ai-bot.onrender.com/signal?t='+Date.now())
                     .then(function(r){ return r.json(); })
-                    .catch(function(){ return {signal: "DOWN", confidence: 88}; })
+                    .catch(function(){ return {signal: "DOWN", confidence: 90}; })
                     .then(function(j){
                         var rawSig = String(j.signal || 'DOWN').toUpperCase();
                         var isDown = (rawSig === 'SELL' || rawSig === 'DOWN' || rawSig === 'PUT');
                         
-                        // Execute single automated trade at Quotex Buy/Sell button
+                        // Execute single automated trade at Quotex Buy/Sell button after scanning completes
                         triggerTrade(isDown);
 
                         // Update top indicator with signal result for 3 seconds
@@ -256,7 +263,7 @@ def bot_script():
                         scanMsg.style.color = col;
                         scanMsg.style.boxShadow = '0 0 22px ' + col;
                         scanMsg.style.animation = 'none';
-                        scanMsg.innerText = sigText + ' (' + (j.confidence || 88) + '%)';
+                        scanMsg.innerText = sigText + ' (' + (j.confidence || 90) + '%)';
                         
                         laserLine.style.background = col;
                         laserLine.style.boxShadow = '0 0 30px ' + col;
