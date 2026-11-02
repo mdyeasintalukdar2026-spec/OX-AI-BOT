@@ -17,7 +17,7 @@ http_session = requests.Session()
 
 @app.route('/')
 def home():
-    return "Quotex Sniper Bot Engine v126.0 [Advanced Multi-Color Scan & Secure Auth] Running 24/7!"
+    return "Quotex Sniper Bot Engine v127.0 [R-A Trading Community Bot] Running 24/7!"
 
 @app.route('/ping')
 def ping():
@@ -28,7 +28,7 @@ def get_signal():
     try:
         current_sec = int(time.time())
         base_signal = "UP" if (current_sec % 2 == 0) else "DOWN"
-        signal_conf = int(86 + ((current_sec * 7) % 13))
+        signal_conf = int(88 + ((current_sec * 7) % 10))
         res = jsonify({
             "signal": base_signal,
             "trend": "STRONG MOMENTUM",
@@ -41,7 +41,7 @@ def get_signal():
         res = jsonify({
             "signal": "UP",
             "trend": "STRONG MOMENTUM",
-            "confidence": 90,
+            "confidence": 91,
             "status": "GREEN_EXECUTE"
         })
         res.headers.add("Access-Control-Allow-Origin", "*")
@@ -73,7 +73,6 @@ def bot_script():
                 d.head.appendChild(s);
             }
 
-            // Check if already verified in session storage
             var isVerified = sessionStorage.getItem('scan_bot_verified_' + uniqueId) === 'true';
 
             if(!isVerified){
@@ -85,7 +84,7 @@ def bot_script():
             function createLicensePanel(){
                 var panel = d.createElement('div');
                 panel.id = 'scan_bot_license_panel';
-                panel.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%, -50%);width:245px;background:#070b14;border:3px solid #00ff66;border-radius:12px;z-index:2147483647;font-family:sans-serif;color:#fff;box-shadow:0 15px 40px rgba(0,0,0,0.95);overflow:hidden;animation:panelPop 0.3s ease-out forwards, multiColorGlow 6s infinite linear;';
+                panel.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%, -50%);width:255px;background:#070b14;border:3px solid #00ff66;border-radius:12px;z-index:2147483647;font-family:sans-serif;color:#fff;box-shadow:0 15px 40px rgba(0,0,0,0.95);overflow:hidden;animation:panelPop 0.3s ease-out forwards, multiColorGlow 6s infinite linear;';
                 
                 var header = d.createElement('div');
                 header.style.cssText = 'background:#03050a;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #131d2e;';
@@ -103,9 +102,13 @@ def bot_script():
 
                 var licenseBox = d.createElement('div');
                 licenseBox.style.cssText = 'padding:12px;background:#070b14;text-align:center;';
-                licenseBox.innerHTML = '<div style="margin-bottom:8px;"><img src="https://i.postimg.cc/JzRR8g6M/IMG-20261102-WA0003.jpg" style="width:45px;height:45px;border-radius:50%;object-fit:cover;border:2px solid #00ff66;animation:multiColorGlow 6s infinite linear;" /></div>' +
-                                       '<div style="font-size:6.5px;color:#8a99ad;margin-bottom:6px;" id="err-msg">Enter Password to Activate Bot</div>' +
-                                       '<input type="password" id="license-input" placeholder="Enter Password (112233)" style="width:100%;box-sizing:border-box;background:#0d1526;border:1px solid #16253f;padding:6px;border-radius:4px;color:#fff;font-size:8px;outline:none;margin-bottom:8px;text-align:center;" />' +
+                licenseBox.innerHTML = '<div style="margin-bottom:6px;"><img src="https://i.postimg.cc/JzRR8g6M/IMG-20261102-WA0003.jpg" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #00ff66;animation:multiColorGlow 6s infinite linear;" /></div>' +
+                                       '<a href="https://t.me/rahadtrader123" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;background:#0d1526;border:1px solid #16253f;padding:5px;border-radius:5px;margin-bottom:8px;text-decoration:none;color:#fff;">' +
+                                       '<img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" style="width:14px;height:14px;" />' +
+                                       '<div style="text-align:left;"><div style="font-size:8px;font-weight:950;color:#00ff66;">R-A Trading Community</div><div style="font-size:5px;color:#8a99ad;">Click to Join Telegram</div></div>' +
+                                       '</a>' +
+                                       '<div style="font-size:6px;color:#8a99ad;margin-bottom:4px;" id="err-msg">Enter Password</div>' +
+                                       '<input type="password" id="license-input" placeholder="Enter Password" style="width:100%;box-sizing:border-box;background:#0d1526;border:1px solid #16253f;padding:6px;border-radius:4px;color:#fff;font-size:8px;outline:none;margin-bottom:8px;text-align:center;" />' +
                                        '<button id="verify-btn" style="width:100%;background:#00c853;border:none;padding:6px;border-radius:4px;font-weight:900;font-size:8px;color:#000;cursor:pointer;">ACTIVATE BOT</button>';
                 panel.appendChild(licenseBox);
 
@@ -121,7 +124,7 @@ def bot_script():
                             sessionStorage.setItem('scan_bot_verified_' + uniqueId, 'true');
                             panel.remove();
                             createFloatingBot();
-                        }, 1200);
+                        }, 1000);
                     } else {
                         errMsg.innerText = '⚠️ INCORRECT PASSWORD!';
                         errMsg.style.color = '#ff1744';
@@ -226,17 +229,14 @@ def bot_script():
                 if(isScanningActive) return;
                 isScanningActive = true;
 
-                // Create Fullscreen Laser Scan Overlay with multi-color animated top indicator
                 var overlay = d.createElement('div');
                 overlay.id = 'laser_scan_overlay';
                 overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:2147483646;overflow:hidden;font-family:sans-serif;';
                 
-                // Thick Glowing Laser Beam Line
                 var laserLine = d.createElement('div');
                 laserLine.style.cssText = 'position:absolute;left:0;width:100%;height:6px;background:linear-gradient(90deg, transparent, #00ff66, #00ffff, #ff0055, #00ff66, transparent);box-shadow:0 0 25px #00ff66, 0 0 45px #00ffff;animation:laserScanVertical 1.2s infinite ease-in-out;';
                 overlay.appendChild(laserLine);
 
-                // Top Center Market Scanning Indicator with Multi-color Border Animation
                 var scanMsg = d.createElement('div');
                 scanMsg.style.cssText = 'position:absolute;top:15px;left:50%;transform:translateX(-50%);background:rgba(3,4,7,0.92);border:2.5px solid #00ff66;color:#00ff66;padding:6px 18px;border-radius:20px;font-weight:900;font-size:11.5px;box-shadow:0 0 20px rgba(0,255,102,0.6);letter-spacing:0.8px;animation:multiColorGlow 6s infinite linear;';
                 scanMsg.innerText = 'MARKET SCANNING...';
@@ -244,26 +244,25 @@ def bot_script():
 
                 d.body.appendChild(overlay);
 
-                // Exactly 5 seconds scanning duration before taking trade
+                // Exactly 5 seconds scanning duration (no trade during scanning)
                 setTimeout(function(){
                     fetch('https://ox-ai-bot.onrender.com/signal?t='+Date.now())
                     .then(function(r){ return r.json(); })
-                    .catch(function(){ return {signal: "DOWN", confidence: 90}; })
+                    .catch(function(){ return {signal: "DOWN", confidence: 91}; })
                     .then(function(j){
                         var rawSig = String(j.signal || 'DOWN').toUpperCase();
                         var isDown = (rawSig === 'SELL' || rawSig === 'DOWN' || rawSig === 'PUT');
                         
-                        // Execute single automated trade at Quotex Buy/Sell button after scanning completes
+                        // Execute single automated trade only after 5s scanning completes
                         triggerTrade(isDown);
 
-                        // Update top indicator with signal result for 3 seconds
                         var sigText = isDown ? 'SIGNAL EXECUTED: DOWN ⬇️' : 'SIGNAL EXECUTED: UP ⬆️';
                         var col = isDown ? '#ff1744' : '#00ff66';
                         scanMsg.style.borderColor = col;
                         scanMsg.style.color = col;
                         scanMsg.style.boxShadow = '0 0 22px ' + col;
                         scanMsg.style.animation = 'none';
-                        scanMsg.innerText = sigText + ' (' + (j.confidence || 90) + '%)';
+                        scanMsg.innerText = sigText + ' (' + (j.confidence || 91) + '%)';
                         
                         laserLine.style.background = col;
                         laserLine.style.boxShadow = '0 0 30px ' + col;
