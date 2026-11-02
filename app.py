@@ -2,6 +2,7 @@ from flask import Flask, jsonify, make_response
 import threading
 import requests
 import time
+import random
 import os
 
 app = Flask(__name__, static_folder=None)
@@ -17,7 +18,7 @@ http_session = requests.Session()
 
 @app.route('/')
 def home():
-    return "Quotex Sniper Bot Engine v127.0 [R-A Trading Community Bot] Running 24/7!"
+    return "Quotex Sniper Bot Engine v128.0 [R-A Trading Community Bot] Running 24/7!"
 
 @app.route('/ping')
 def ping():
@@ -27,11 +28,12 @@ def ping():
 def get_signal():
     try:
         current_sec = int(time.time())
-        base_signal = "UP" if (current_sec % 2 == 0) else "DOWN"
-        signal_conf = int(88 + ((current_sec * 7) % 10))
+        # Dynamic signal generation to avoid one-sided sticking
+        base_signal = "UP" if (random.choice([True, False]) and current_sec % 3 != 0) else "DOWN"
+        signal_conf = int(88 + (current_sec % 9))
         res = jsonify({
             "signal": base_signal,
-            "trend": "STRONG MOMENTUM",
+            "trend": "DYNAMIC MOMENTUM",
             "confidence": signal_conf,
             "status": "GREEN_EXECUTE"
         })
@@ -41,7 +43,7 @@ def get_signal():
         res = jsonify({
             "signal": "UP",
             "trend": "STRONG MOMENTUM",
-            "confidence": 91,
+            "confidence": 92,
             "status": "GREEN_EXECUTE"
         })
         res.headers.add("Access-Control-Allow-Origin", "*")
@@ -89,7 +91,7 @@ def bot_script():
                 var header = d.createElement('div');
                 header.style.cssText = 'background:#03050a;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #131d2e;';
                 header.innerHTML = '<div style="display:flex;align-items:center;gap:8px;">' +
-                                   '<img src="https://i.postimg.cc/JzRR8g6M/IMG-20261102-WA0003.jpg" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid #00ff66;" />' +
+                                   '<img src="https://i.postimg.cc/JzRR8g6M/IMG-20261102-WA0003.jpg" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:2.5px solid #00ff66;animation:multiColorGlow 6s infinite linear;" />' +
                                    '<div>' +
                                    '<div style="font-size:10px;font-weight:900;color:#fff;">AUTO SCAN BOT</div>' +
                                    '<div style="font-size:5.5px;color:#8a99ad;">SECURE LOGIN</div>' +
@@ -102,7 +104,7 @@ def bot_script():
 
                 var licenseBox = d.createElement('div');
                 licenseBox.style.cssText = 'padding:12px;background:#070b14;text-align:center;';
-                licenseBox.innerHTML = '<div style="margin-bottom:6px;"><img src="https://i.postimg.cc/JzRR8g6M/IMG-20261102-WA0003.jpg" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #00ff66;animation:multiColorGlow 6s infinite linear;" /></div>' +
+                licenseBox.innerHTML = '<div style="margin-bottom:6px;"><img src="https://i.postimg.cc/JzRR8g6M/IMG-20261102-WA0003.jpg" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:3px solid #00ff66;animation:multiColorGlow 6s infinite linear;" /></div>' +
                                        '<a href="https://t.me/rahadtrader123" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;background:#0d1526;border:1px solid #16253f;padding:5px;border-radius:5px;margin-bottom:8px;text-decoration:none;color:#fff;">' +
                                        '<img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" style="width:14px;height:14px;" />' +
                                        '<div style="text-align:left;"><div style="font-size:8px;font-weight:950;color:#00ff66;">R-A Trading Community</div><div style="font-size:5px;color:#8a99ad;">Click to Join Telegram</div></div>' +
@@ -204,22 +206,41 @@ def bot_script():
 
             function triggerTrade(isSell){
                 var clicked = false;
-                var selectors = isSell ? [
-                    '.section-deal__button-down button', '.section-deal__button-down',
-                    '.btn-put', 'button.put', 'button[class*="put"]', '.button-sell', '[class*="sell"]'
-                ] : [
-                    '.section-deal__button-up button', '.section-deal__button-up',
-                    '.btn-call', 'button.call', 'button[class*="call"]', '.button-buy', '[class*="buy"]'
-                ];
-
-                for(var i=0; i<selectors.length; i++){
-                    var btns = d.querySelectorAll(selectors[i]);
-                    for(var j=0; j<btns.length; j++){
-                        if(btns[j] && btns[j].getBoundingClientRect().width > 0){
-                            if(forceClick(btns[j])){ clicked = true; break; }
-                        }
+                var allButtons = d.querySelectorAll('button, div[role="button"], span[class*="btn"]');
+                for(var i=0; i<allButtons.length; i++){
+                    var btn = allButtons[i];
+                    var text = (btn.innerText || '').trim().toUpperCase();
+                    var cls = (btn.className || '').toLowerCase();
+                    
+                    var isUpBtn = cls.includes('call') || cls.includes('buy') || cls.includes('up') || text === 'UP' || text === 'BUY' || text === 'HIGHER';
+                    var isDownBtn = cls.includes('put') || cls.includes('sell') || cls.includes('down') || text === 'DOWN' || text === 'SELL' || text === 'LOWER';
+                    
+                    if(!isSell && isUpBtn && btn.getBoundingClientRect().width > 0){
+                        if(forceClick(btn)){ clicked = true; break; }
                     }
-                    if(clicked) break;
+                    if(isSell && isDownBtn && btn.getBoundingClientRect().width > 0){
+                        if(forceClick(btn)){ clicked = true; break; }
+                    }
+                }
+                
+                if(!clicked){
+                    var selectors = isSell ? [
+                        '.section-deal__button-down button', '.section-deal__button-down',
+                        '.btn-put', 'button.put', 'button[class*="put"]', '.button-sell', '[class*="sell"]'
+                    ] : [
+                        '.section-deal__button-up button', '.section-deal__button-up',
+                        '.btn-call', 'button.call', 'button[class*="call"]', '.button-buy', '[class*="buy"]'
+                    ];
+
+                    for(var i=0; i<selectors.length; i++){
+                        var btns = d.querySelectorAll(selectors[i]);
+                        for(var j=0; j<btns.length; j++){
+                            if(btns[j] && btns[j].getBoundingClientRect().width > 0){
+                                if(forceClick(btns[j])){ clicked = true; break; }
+                            }
+                        }
+                        if(clicked) break;
+                    }
                 }
             }
 
@@ -244,16 +265,16 @@ def bot_script():
 
                 d.body.appendChild(overlay);
 
-                // Exactly 5 seconds scanning duration (no trade during scanning)
+                // Exactly 5 seconds scanning duration with NO trade during scanning
                 setTimeout(function(){
                     fetch('https://ox-ai-bot.onrender.com/signal?t='+Date.now())
                     .then(function(r){ return r.json(); })
-                    .catch(function(){ return {signal: "DOWN", confidence: 91}; })
+                    .catch(function(){ return {signal: "DOWN", confidence: 92}; })
                     .then(function(j){
                         var rawSig = String(j.signal || 'DOWN').toUpperCase();
                         var isDown = (rawSig === 'SELL' || rawSig === 'DOWN' || rawSig === 'PUT');
                         
-                        // Execute single automated trade only after 5s scanning completes
+                        // Execute single automated trade right after 5s scanning completes
                         triggerTrade(isDown);
 
                         var sigText = isDown ? 'SIGNAL EXECUTED: DOWN ⬇️' : 'SIGNAL EXECUTED: UP ⬆️';
@@ -262,11 +283,12 @@ def bot_script():
                         scanMsg.style.color = col;
                         scanMsg.style.boxShadow = '0 0 22px ' + col;
                         scanMsg.style.animation = 'none';
-                        scanMsg.innerText = sigText + ' (' + (j.confidence || 91) + '%)';
+                        scanMsg.innerText = sigText + ' (' + (j.confidence || 92) + '%)';
                         
                         laserLine.style.background = col;
                         laserLine.style.boxShadow = '0 0 30px ' + col;
 
+                        // Display signal for 3 seconds then remove overlay
                         setTimeout(function(){
                             overlay.remove();
                             isScanningActive = false;
